@@ -1,0 +1,79 @@
+EKSPERIMEN 6 — TAHAP 4 | TRAINING 5-FOLD, PROTOKOL TERKUNCI
+
+1. PRASYARAT
+   E6 Tahap 2: PASS_E6_FOLDS_LOCKED
+   E6 Tahap 3: PASS_E6_DATALOADER_VALIDATION
+   E5 RAD-DINO GPU smoke: Frozen RAW/CLAHE, LoRA RAW/CLAHE PASS.
+   Laptop NVIDIA RTX 4050 VRAM 6GB dan tb-env yang sama dengan Eksperimen 5.
+
+2. FILE ZIP, EKSTRAK LANGSUNG KE RAD-DINO-TB\eksperimen6\src\
+   e6_training_common.py
+   04_training_config_e6_LOCKED.json
+   04_train_frozen_5fold_e6.py
+   04_train_lora_5fold_e6.py
+   04_status_training_e6.py
+   PANDUAN_E6_TAHAP4_TRAINING_5FOLD.txt
+   Tidak memerlukan perubahan isi folder eksperimen4 / eksperimen5.
+
+3. CHECK INPUT LOCK (tidak melatih model; tidak membaca piksel test):
+   python 04_train_frozen_5fold_e6.py --fold 1 --variant raw --check
+   python 04_train_lora_5fold_e6.py --fold 1 --variant raw --check
+
+4. GPU SMOKE PERTAMA (satu optimizer step, tidak menyimpan output training):
+   python 04_train_frozen_5fold_e6.py --fold 1 --variant raw --smoke
+   python 04_train_lora_5fold_e6.py --fold 1 --variant raw --smoke
+   Catatan: ulangi --smoke untuk CLAHE saat akan memulai CLAHE.
+
+5. TRAINING FROZEN RAW (contoh tahap pertama):
+   python 04_train_frozen_5fold_e6.py --fold 1 --variant raw
+   python 04_train_frozen_5fold_e6.py --fold 2 --variant raw
+   python 04_train_frozen_5fold_e6.py --fold 3 --variant raw
+   python 04_train_frozen_5fold_e6.py --fold 4 --variant raw
+   python 04_train_frozen_5fold_e6.py --fold 5 --variant raw
+
+   Ganti '--variant raw' dengan '--variant clahe' untuk Frozen CLAHE.
+   Gunakan 04_train_lora_5fold_e6.py pada --fold 1..5 untuk LoRA RAW/CLAHE.
+   Jangan menjalankan dua proses GPU training secara paralel pada VRAM 6 GB.
+
+6. KONFIGURASI (identik dengan E5, kecuali CV):
+   Frozen head: batch=64; gradient accumulation=1; AdamW head LR=0.001.
+   LoRA: micro batch=1; gradient accumulation=16 (effective 16);
+         LoRA LR=0.0001; head LR=0.001; r=8; alpha=16; dropout=0.05;
+         blocks 9-12 (zero-based 8-11) query/value.
+   Cross Entropy; weight decay=0.0001; 30 epochs; patience=5;
+   minimum AUROC improvement=0.001; seed=42; threshold=0.5.
+   Checkpoint terbaik dipilih dari masing-masing fold validation AUROC.
+   AMP FP16 khusus LoRA. Test E5 sama sekali TIDAK dibaca saat training.
+
+7. OUTPUT
+   eksperimen6\output\training\frozen_raw_fold_1\
+   eksperimen6\output\training\frozen_clahe_fold_1\
+   eksperimen6\output\training\lora_raw_fold_1\
+   eksperimen6\output\training\lora_clahe_fold_1\
+   ... hingga fold_5 untuk masing-masing kombinasi.
+   - training_history.csv: train_loss/accuracy, val_loss/accuracy/AUROC per epoch
+   - best_classifier.pt: best head checkpoint
+   - best_adapter/: best LoRA safetensors+config (untuk LoRA)
+   - best_validation_predictions.csv: OOF predictions for heldout validation fold
+   - best_validation_metrics.json: six metrics at best epoch
+   - latest_training_state.pt: resume checkpoint setelah epoch lengkap
+   - run_summary.json: PASS_E6_FOLD_TRAINING_COMPLETE
+
+8. RECOVERY
+   Jika terputus di tengah dan latest_training_state.pt sudah ada:
+   python 04_train_lora_5fold_e6.py --fold 1 --variant raw --resume
+   Jangan gunakan --resume setelah run_summary.json berstatus PASS.
+   Cache Frozen development 1887 CLS otomatis digunakan bersama oleh lima fold
+   dengan checkpoint pretrained yang tidak berubah, tanpa fitting apa pun.
+
+9. STATUS
+   python 04_status_training_e6.py
+   Setelah SEMUA 20 run PASS, lanjut ke tahap agregasi OOF (bukan test dulu).
+
+CATATAN RISET
+- 5-fold digunakan pada gabungan Train+Validation E5 (1.887 citra).
+- Fixed E5 test (333 citra) disimpan sebagai comparative holdout yang
+  sudah pernah digunakan di E5, bukan klaim test konfirmatori baru.
+- Jangan mengganti checkpoint fold berdasarkan hasil testing.
+- Pastikan cukup ruang disk karena 20 checkpoint/resume terutama model LoRA.
+- Skrip diperiksa sintaks dan diuji pada fixture audit; GPU E6 asli harus dites di lokal.

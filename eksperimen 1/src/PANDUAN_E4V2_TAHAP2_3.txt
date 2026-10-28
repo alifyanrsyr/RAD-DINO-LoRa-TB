@@ -1,0 +1,54 @@
+EKSPERIMEN 4V2 — E4 dataset + E6 85% CV style (preserved original E4 fixed test)
+================================================================================
+Only use in RAD-DINO-TB\eksperimen4v2\src. Do not overwrite eksperimen4.
+
+Real dataset: 1668 images, 1284 patients. Development 1411/1091, test 257/193.
+Unlike E6, E4v2 development is IMBALANCED: DS=478, DR=933.
+Original E4 test was already previously examined (reused holdout).
+
+Source lock must be at:
+  eksperimen4v2\data\manifests\experiment4_fixedtest257_dev1411_5fold_seed42_v1\
+    01_e4_cv85_fold_lock_report.json
+
+Extract all .py and config JSON files into eksperimen4v2\src.
+
+From (tb-env) CMD in eksperimen4v2\src:
+
+  1) Verify original fold creation (no training):
+     python 01_fold5.py --verify
+
+  2) Audit 20 DataLoader combinations (no test PNG read):
+     python 02_validasi_dataloader_e4v2.py --check
+     python 02_validasi_dataloader_e4v2.py --run
+
+  3) GPU smoke for Frozen and LoRA, RAW and CLAHE (no training run):
+     python 03_train_frozen_5fold_e4v2.py --fold 1 --variant raw --smoke
+     python 03_train_frozen_5fold_e4v2.py --fold 1 --variant clahe --smoke
+     python 03_train_lora_5fold_e4v2.py --fold 1 --variant raw --smoke
+     python 03_train_lora_5fold_e4v2.py --fold 1 --variant clahe --smoke
+
+  4) Check full training preflight, then run 20 jobs sequentially with Python:
+     python 03_run_semua_training_e4v2.py --check
+     python 03_run_semua_training_e4v2.py
+
+  5) Check training status:
+     python 03_status_training_e4v2.py
+
+  To stop running: Ctrl+C after end-of-epoch checkpoint; rerun
+     python 03_run_semua_training_e4v2.py
+  Resuming requires latest_training_state.pt. Jobs already COMPLETE are skipped.
+
+All E4v2 outputs: RAD-DINO-TB\eksperimen4v2\output\...
+No E5, E6, E7 output will be changed; test images not read during train.
+
+Frozen backbone uses cached development CLS 768 features (immutable pretrained RAD-DINO).
+LoRA uses query/value rank=8, alpha=16, dropout=.05 on blocks 8..11 (zero-based).
+Optimizer AdamW, lr_head 1e-3, lr_lora 1e-4, weight_decay 1e-4.
+Frozen head batch 64; LoRA physical batch 1, accumulation 16.
+Max 30 epochs; AUROC early stopping patience 5, min_delta .001; threshold .5.
+These are E6 hyperparameters, NOT E7.
+
+After 20 runs, aggregate OOF, select primary by pooled OOF AUROC and
+only then evaluate five-checkpoint ensemble on the original 257 test images.
+
+TESTING NOTE: Test E4 and E6 cohorts differ, so comparisons are descriptive.

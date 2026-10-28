@@ -1,0 +1,54 @@
+EKSPERIMEN 4V2 — TAHAP 5: FINAL 5-FOLD ENSEMBLE TESTING
+======================================================
+
+LOKASI SKRIP
+  D:\S2 Teknik Informatika\Semester 1\Riset\pre-researchhhh\RAD-DINO-TB\eksperimen4v2\src\
+  File: 05_evaluasi_ensemble_testing_e4v2.py
+
+KEBUTUHAN
+  - Python environment tb-env seperti pada E4v2 training (torch, peft, transformers, pandas, PIL, sklearn).
+  - 20 training COMPLETE dan seluruh checkpoint, adapter, training_history, manifest masih pada tempatnya.
+  - 04_e4v2_oof_model_selection_LOCKED.json dan .sha256 tidak berubah.
+  - e4v2_training_common.py dari paket training Tahap 2/3 masih tersedia di folder src.
+  - E4 original split serta 257 citra test E4 sudah ada pada lokasi aslinya.
+
+PERINTAH WINDOWS CMD
+  cd /d "D:\S2 Teknik Informatika\Semester 1\Riset\pre-researchhhh\RAD-DINO-TB\eksperimen4v2\src"
+  python 04_evaluasi_oof_5fold_e4v2.py --verify
+  python 05_evaluasi_ensemble_testing_e4v2.py --check
+  python 05_evaluasi_ensemble_testing_e4v2.py --run-test
+  python 05_evaluasi_ensemble_testing_e4v2.py --verify
+
+PENTING
+  --check: baca metadata saja, TIDAK membaca piksel test.
+  --run-test: membaca 257 PNG testing untuk keempat konfigurasi, masing-masing 5 checkpoint;
+             menghitung probabilitas tiap fold, rata-rata probabilitas dari 5 fold dan metrik.
+  --verify: verifikasi file hasil & checksum tanpa menjalankan inferensi.
+  --resume-test: hanya untuk interrupted final testing (folder _staging ada dan folder final belum ada).
+  Jika --run-test terhenti sebelum selesai, JANGAN hapus folder _staging.
+  Jalankan:
+      python 05_evaluasi_ensemble_testing_e4v2.py --resume-test
+
+OUTPUT
+  eksperimen4v2/output/testing/05_e4v2_five_fold_ensemble_holdout_v1/
+    05_test_predictions_<method>_<variant>_fold_<1..5>.csv  (20 files)
+    05_test_ensemble_predictions_<method>_<variant>.csv    (4 files)
+    05_e4v2_ensemble_test_comparison.csv
+    05_e4v2_ensemble_holdout_test_LOCKED.json
+    05_e4v2_ensemble_holdout_test_LOCKED.json.sha256
+
+INTERPRETASI
+  Model utama ditetapkan M4 (LoRA CLAHE) berdasarkan OOF AUROC tertinggi = 0.7080233377.
+  Semua model dievaluasi secara deskriptif, tetapi test AUROC tertinggi TIDAK dipakai untuk
+  mengubah pilihan model utama. Threshold tetap 0.5.
+
+  Dataset E4v2: 1,668 citra, test asli E4 = 257 citra (DS 81, DR 176) / 193 pasien.
+  Test E4 sudah pernah dievaluasi di E4 asli: pengujian ulang bersifat eksploratif.
+  Cohort test E4v2 berbeda dengan E6; jangan menganggap selisih hasil sebagai efek kausal
+  satu perubahan protokol.
+
+VALIDASI PAKET
+  - Python syntax verified.
+  - Simulation of 20 per-fold probability outputs and four 5-fold ensembles passed.
+  - Actual original E4 images and model checkpoints were NOT run in build environment.
+  - GPU inference / end-to-end checks must pass on your Windows tb-env installation.

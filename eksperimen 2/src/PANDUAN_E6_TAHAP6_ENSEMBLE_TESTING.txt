@@ -1,0 +1,72 @@
+EKSPERIMEN 6 — TAHAP 6: FINAL TESTING 5-FOLD PROBABILITY ENSEMBLE
+===============================================================
+KONDISI AWAL
+- Tahap 5 --verify harus PASS_E6_OOF_MODEL_SELECTION_VERIFIED.
+- Keempat konfigurasi M1 Frozen RAW, M2 Frozen CLAHE, M3 LoRA RAW,
+  M4 LoRA CLAHE, masing-masing memiliki 5 checkpoint BEST lengkap.
+- Primary model sudah LOCKED: M4 LoRA CLAHE, OOF AUROC 0.7178951282419973.
+- Hanya gunakan hasil evaluasi test untuk DESKRIPSI, bukan seleksi model ulang.
+- Dataset test 333 citra/259 pasien adalah SAME E5 test, telah dilihat di E5.
+
+INSTALASI
+Ekstrak hanya file 06_evaluasi_ensemble_testing_e6.py ke:
+  D:\S2 Teknik Informatika\Semester 1\Riset\pre-researchhhh\RAD-DINO-TB\eksperimen6\src\
+Biarkan seluruh file E5/E6 lain apa adanya. Jangan mengubah folder training.
+Paket Tahap 4 dan Tahap 5 harus sudah terpasang.
+
+PERINTAH DI CMD WINDOWS (tb-env) pada eksperimen6\src
+
+A. Verifikasi model dipilih sebelum membuka test:
+    python 05_evaluasi_oof_5fold_e6.py --verify
+
+B. Audit Tahap 6 tanpa membaca piksel test:
+    python 06_evaluasi_ensemble_testing_e6.py --check
+   Target: PASS_E6_STAGE6_CHECK
+
+C. Satu kali final test (akan membaca test 333 citra):
+    python 06_evaluasi_ensemble_testing_e6.py --run-test
+   Tahap ini melakukan INFERENCE pada 20 checkpoint (4 model x 5 fold).
+   Tidak ada training ulang.
+
+D. Jika test inference TERPUTUS dan folder _staging ada:
+    python 06_evaluasi_ensemble_testing_e6.py --resume-test
+   Checkpoint test inference yang sudah selesai di-reuse setelah diverifikasi;
+   proses tidak melanjutkan microbatch, melainkan mengulangi checkpoint inference
+   terakhir jika belum menghasilkan prediksi lengkap 333 citra.
+
+E. Verifikasi final testing TANPA inferensi ulang:
+    python 06_evaluasi_ensemble_testing_e6.py --verify
+   Target: PASS_E6_FIXED_HOLDOUT_5FOLD_ENSEMBLE_VERIFIED
+
+OFFLINE HUGGING FACE CACHE: tambahkan --offline-model hanya bila
+microsoft/rad-dino revisi terkunci sudah tersimpan dalam cache lokal.
+
+OUTPUT:
+ eksperimen6\output\testing\06_e6_five_fold_ensemble_holdout_v1\
+  06_test_predictions_frozen_raw_fold_1.csv  ... fold_5.csv
+  06_test_predictions_frozen_clahe_fold_1.csv ... fold_5.csv
+  06_test_predictions_lora_raw_fold_1.csv ... fold_5.csv
+  06_test_predictions_lora_clahe_fold_1.csv ... fold_5.csv
+  06_test_ensemble_predictions_frozen_raw.csv
+  06_test_ensemble_predictions_frozen_clahe.csv
+  06_test_ensemble_predictions_lora_raw.csv
+  06_test_ensemble_predictions_lora_clahe.csv
+  06_e6_ensemble_test_comparison.csv
+  06_e6_ensemble_holdout_test_LOCKED.json
+  06_e6_ensemble_holdout_test_LOCKED.json.sha256
+
+KIRIM SETELAH SELESAI:
+ - 06_e6_ensemble_test_comparison.csv
+ - 06_e6_ensemble_holdout_test_LOCKED.json
+
+CATATAN TEKNIS
+- Input = PNG yang sudah dihasilkan dan diaudit pada E5 (RAW/CLAHE 518 px).
+- Setiap checkpoint dievaluasi pada SAME test image order dan identitas pasien.
+- Untuk setiap model, probabilitas DR-TB 5 fold dirata-ratakan (mean unweighted).
+- Threshold yang terkunci 0.5 diterapkan setelah probability averaging.
+- Checkpoints = BEST validation-AUROC, bukan latest training state.
+- E5 tetap tak diubah. Tahap 5 tetap tak diubah.
+- Staging disimpan ketika ada interupsi, dan --resume-test boleh melanjutkan.
+- Bila --check gagal, JANGAN paksa --run-test; jangan mengubah file LOCK.
+- Script diuji sintaks + fungsi averaging/integritas dengan data simulasi.
+  Pengujian CUDA/inference pada checkpoint pengguna harus dilakukan di PC pengguna.

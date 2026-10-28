@@ -1,0 +1,89 @@
+{
+  "experiment": "experiment4v2",
+  "model_id": "microsoft/rad-dino",
+  "seed": 42,
+  "labels": {
+    "DS-TB": 0,
+    "DR-TB": 1
+  },
+  "variants": [
+    "raw",
+    "clahe"
+  ],
+  "methods": [
+    "frozen",
+    "lora"
+  ],
+  "backbone_feature": "CLS_768",
+  "head": "Linear(768,2)",
+  "optimizer": "AdamW",
+  "loss": "CrossEntropyLoss",
+  "learning_rate_head": 0.001,
+  "learning_rate_lora": 0.0001,
+  "weight_decay": 0.0001,
+  "frozen_head_batch_size": 64,
+  "frozen_gradient_accumulation": 1,
+  "lora_micro_batch_size": 1,
+  "lora_gradient_accumulation": 16,
+  "lora": {
+    "r": 8,
+    "alpha": 16,
+    "dropout": 0.05,
+    "zero_based_blocks": [
+      8,
+      9,
+      10,
+      11
+    ],
+    "modules": [
+      "query",
+      "value"
+    ],
+    "expected_trainable_adapter_parameters": 98304
+  },
+  "max_epochs": 30,
+  "early_stopping_patience": 5,
+  "early_stopping_min_delta": 0.001,
+  "selection_metric": "validation_auroc",
+  "decision_threshold": 0.5,
+  "test_pixels_inaccessible_to_training": true,
+  "rescale_factor": 0.00392156862745098,
+  "image_mean": [
+    0.5307,
+    0.5307,
+    0.5307
+  ],
+  "image_std": [
+    0.2583,
+    0.2583,
+    0.2583
+  ],
+  "do_resize": false,
+  "do_center_crop": false,
+  "expected_hashes": {
+    "e4_split_sha256": "addf00a77ca7fbd88dcabca081a7b8a3207b3230fa275d8f3d284c9346ec91ad",
+    "e4_original_cv_sha256": "0c8ef15bab73936b508565e579ac04e60546208c8dcea092f5640e6036889422",
+    "e4_processed_manifest_sha256": "21689d0ee3fc10424d04198202fd06ccf36f7402a9f8d702073233d99e21814c",
+    "e4_audit_sha256": "a560ed8c7da6716bc6bca8b9a12cf4a02bee19b9d6b0bd6fb02ec28729e2e600"
+  },
+  "status": "LOCKED_PROTOCOL_E4V2_ALIGNED_WITH_E6_2026-10-23",
+  "cross_validation": true,
+  "folds": 5,
+  "split_algorithm": "StratifiedGroupKFold",
+  "split_seed": 42,
+  "cv_scope": "Original E4 train+validation 1411 images / 1091 patients",
+  "fixed_holdout": "Original E4 test 257 images / 193 patients (NEVER read during training)",
+  "checkpoint_selection": "per_fold_validation_AUROC_min_delta_0.001",
+  "primary_model_selection_after_cv": "pooled_OOF_AUROC",
+  "final_inference": "five_checkpoint_probability_ensemble_on_original_E4_test",
+  "protocol_note": "Retest E4 original cohort with E6 CV protocol and exact E6 hyperparameters; unbalanced DS/DR data",
+  "e5_test_manifest_sha256": null,
+  "splits": {
+    "development_images": 1411,
+    "development_patients": 1091,
+    "heldout_test_images": 257,
+    "heldout_test_patients": 193
+  },
+  "locked_e4v2_fold_report_sha256": "96b8c647d87eda612e506a16f2673bb67ae47c251a06ad5227c3b1f9e3685083",
+  "locked_e4v2_development_manifest_sha256": "e5860c8f39b364974290656b0cfb041a71e8ac1e8689e71169b58ed87b377930"
+}

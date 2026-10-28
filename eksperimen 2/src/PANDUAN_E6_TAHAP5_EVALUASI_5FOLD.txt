@@ -1,0 +1,83 @@
+EKSPERIMEN 6 — TAHAP 5: EVALUASI INTERNAL 5-FOLD + OOF MODEL SELECTION
+================================================================================
+
+STATUS INPUT
+- 20 run training harus COMPLETE: M1/M2/M3/M4 x 5 fold.
+- Sumber training berasal dari Tahap 4 yang dikunci pada 22 Oktober 2026.
+- Holdout E5 333 citra testing TIDAK DIPAKAI dan tidak dibaca oleh skrip ini.
+- Skrip menghitung hasil dari best_validation_predictions.csv tanpa inference baru.
+
+INSTALASI
+1. Ekstrak 05_evaluasi_oof_5fold_e6.py ke:
+   D:\S2 Teknik Informatika\Semester 1\Riset\pre-researchhhh\RAD-DINO-TB\eksperimen6\src\
+2. Jangan mengganti atau menimpa berkas Tahap 4 dan manifest dari Tahap 1–3.
+3. Gunakan lingkungan Python (tb-env) tempat training E6 sudah berjalan.
+   Diperlukan pandas, numpy, scikit-learn.
+
+CARA MENJALANKAN (Windows CMD)
+cd /d "D:\S2 Teknik Informatika\Semester 1\Riset\pre-researchhhh\RAD-DINO-TB\eksperimen6\src"
+
+A. Konfirmasi semua run selesai:
+python 04_status_training_e6.py
+=> Target: COMPLETED: 20/20 training runs
+
+B. Pemeriksaan integritas READ ONLY:
+python 05_evaluasi_oof_5fold_e6.py --check
+=> Target: PASS_E6_OOF_PREFLIGHT_20_RUNS
+=> Mencetak tabel OOF AUROC & fold mean+-SD (preview, tanpa menulis berkas).
+
+C. Jika pemeriksaan lulus, buat & kunci hasil:
+python 05_evaluasi_oof_5fold_e6.py --run
+=> Target: PASS_E6_OOF_MODEL_SELECTION_LOCKED
+=> Otomatis menguji ulang hash dan hasil perhitungan pada akhir proses.
+
+D. Verifikasi tersendiri sewaktu-waktu:
+python 05_evaluasi_oof_5fold_e6.py --verify
+=> Target: PASS_E6_OOF_MODEL_SELECTION_VERIFIED
+
+OUTPUT (semua di folder baru; tidak mengubah file training):
+eksperimen6\output\cross_validation\05_oof_model_selection_v1\
+  05_e6_fold_metrics_20runs.csv
+  05_e6_oof_comparison_4models.csv
+  05_e6_oof_predictions_frozen_raw.csv
+  05_e6_oof_predictions_frozen_clahe.csv
+  05_e6_oof_predictions_lora_raw.csv
+  05_e6_oof_predictions_lora_clahe.csv
+  05_e6_oof_model_selection_LOCKED.json
+  05_e6_oof_model_selection_LOCKED.json.sha256
+
+PEMERIKSAAN INTERNAL
+- Checksum konfigurasi Tahap 4, manifest development, dan laporan kunci fold.
+- Konfirmasi konsistensi SHA manifest train/validation per fold.
+- 20 run_summary, run_config, best_validation_metrics, training_history,
+  best_validation_predictions, best_classifier.
+- Untuk LoRA: keberadaan adapter .safetensors dan adapter_config.json.
+- Identitas citra dan pasien dalam setiap file prediksi sama persis dengan validation fold.
+- Prediksi valid: label DS=0, DR=1, p_dr di interval [0,1], threshold=0.5.
+- Hitung ulang AUROC, Macro-F1, Balanced Accuracy, Sensitivity DR,
+  Specificity DS, Accuracy, TN/FP/FN/TP dari prediksi tersimpan.
+- Cek metrik cocok dengan laporan training masing-masing fold.
+- Gabung tepat 1.887 prediksi OOF per model, tanpa duplikasi pasien lintas fold.
+- Mean +- SD sample dihitung atas 5 fold AUROC (ddof=1).
+- Pilih model primer berdasarkan pooled OOF AUROC tertinggi.
+  Jika seri: mean fold AUROC terbesar, lalu nama model alfabetis.
+- Catat fingerprint 20 set output file dan keputusan primer dalam JSON locked.
+- Tidak mengakses piksel/manifest baris test dan tidak melakukan inference/training.
+
+PENTING
+- --run MENOLAK overwrite bila folder output Tahap 5 sudah ada. Gunakan --verify.
+- Jika --check gagal, JANGAN lanjut ke --run; periksa run yang ditunjukkan error.
+- Jika output Tahap 5 parsial akibat crash, amankan folder tersebut sebelum
+  memperbaiki masalah; jangan menghapus data sembarangan.
+- OOF yang dipakai untuk memilih konfigurasi BUKAN prediksi ensemble 5 checkpoint.
+- Checkpoint dipilih dengan val AUROC pada fold yang sama, sehingga OOF dapat
+  sedikit optimistis (bukan nested CV).
+- Fixed E5 test 15% telah dievaluasi di Eksperimen 5: evaluasi E6 nantinya
+  merupakan perbandingan eksploratif pada set yang sama, bukan holdout baru.
+
+SELANJUTNYA
+Upload dua file setelah Tahap 5 PASS:
+  05_e6_oof_comparison_4models.csv
+  05_e6_oof_model_selection_LOCKED.json
+Kita audit konfigurasi primer dan baru menyiapkan Tahap 6:
+  ensembel rata-rata 5 checkpoint pada fixed E5 test 333 citra.

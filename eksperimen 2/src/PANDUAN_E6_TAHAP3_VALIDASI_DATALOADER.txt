@@ -1,0 +1,63 @@
+EKSPERIMEN 6 - TAHAP 3: VALIDASI DATALOADER (TANPA TRAINING)
+==============================================================
+
+Status prasyarat:
+- 02_e6_5fold_lock_report.json = PASS_E6_FOLDS_LOCKED
+- 1887 citra development dari E5 train+validation, 1471 pasien
+- 333 citra test E5 dibiarkan tetap / tidak dibaca piksel
+- 5 fold pada 85% development (StratifiedGroupKFold, seed42)
+
+1. EKSTRAK
+Simpan 03_validasi_dataloader_eksperimen6.py di:
+RAD-DINO-TB\eksperimen6\src\
+
+Eksperimen 5 tetap berada di folder saudara:
+RAD-DINO-TB\eksperimen5\
+
+JANGAN menyalin 4440 PNG atau memodifikasi direktori Eksperimen 5.
+Skrip otomatis mengambil PNG dari E5/data/processed/experiment5_letterbox518_v1.
+
+2. PERIKSA INPUT (tidak membuka piksel citra)
+(tb-env) > python 03_validasi_dataloader_eksperimen6.py --check
+
+Keluaran diharapkan:
+DRY CHECK PASS_E6_DATALOADER_LOCKS
+
+3. PERIKSA DATALOADER (memuat sejumlah batch TRAIN/VAL untuk semua fold)
+(tb-env) > python 03_validasi_dataloader_eksperimen6.py --run --batch-size 4 --batches 2
+
+Jika processor RAD-DINO telah tersimpan dalam cache lokal dan internet tidak digunakan:
+(tb-env) > python 03_validasi_dataloader_eksperimen6.py --run --batch-size 4 --batches 2 --offline-processor
+
+Perintah --run akan memeriksa semua kombinasi:
+  5 fold x 2 subset (train, validation) x 2 varian (RAW, CLAHE) = 20 kombinasi
+  2 batch x 4 citra untuk setiap kombinasi
+
+Batch 4 hanya untuk AUDIT DATALOADER, BUKAN batch training.
+Training hyperparameter tetap mengikuti protokol E5:
+  Frozen: classifier head batch 64, accumulation 1
+  LoRA: physical batch 1, gradient accumulation 16
+
+4. OUTPUT
+RAD-DINO-TB\eksperimen6\audits\03_dataloader_validation\03_e6_dataloader_validation_report.json
+
+Status yang dibutuhkan sebelum masuk training:
+PASS_E6_DATALOADER_VALIDATION
+
+Laporan tidak akan ditimpa apabila sudah ada; jangan hapus laporan PASS.
+Jika --run gagal, periksa traceback dan file yang disebutkan sebelum mencoba lagi.
+
+5. KEAMANAN DATA
+- Pemeriksaan checksum seluruh manifest split/processed E5 + semua fold E6
+- Periksa bahwa setiap pasien hanya memiliki satu fold validation dan tak ada overlap
+- Verifikasi keberadaan 1887 x 2 PNG development, tanpa membuka piksel test
+- Pembacaan PNG grayscale, konversi RGB, normalisasi processor microsoft/rad-dino sekali
+- Format batch [B, 3, 518, 518], label DS=0/DR=1, tanpa augmentasi
+- Tanpa bobot model, inferensi, training, atau perubahan E5/E6 locked manifests
+
+6. PENGUJIAN KODE
+- Pemeriksaan sintaks PASS
+- Pemeriksaan audit fold/manifest dengan fixture terpisah PASS
+- Smoke DataLoader pada fixture PNG simulasi PASS menggunakan processor tiruan
+- Pemanggilan processor Hugging Face yang sesungguhnya belum diuji di GPU komputer Anda
+  (tidak tersedia transformers dalam lingkungan pengujian ini)

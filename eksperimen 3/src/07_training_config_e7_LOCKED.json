@@ -1,0 +1,78 @@
+{
+  "status": "LOCKED_E7_FOUR_MODELS",
+  "experiment": "experiment7",
+  "model_id": "microsoft/rad-dino",
+  "backbone_revision": "110cbc18d5133582e320b43d53bf5c44e410c936",
+  "dataset_source": "E5 preprocessed PNG, E6 locked 5-fold manifests",
+  "development_images": 1887,
+  "development_patients": 1471,
+  "heldout_test_images_reference_only": 333,
+  "n_splits": 5,
+  "split_seed": 42,
+  "model_seed": 42,
+  "optimizer": "AdamW",
+  "loss": "CrossEntropyLoss",
+  "learning_rate_head": 0.0001,
+  "learning_rate_lora": 0.0001,
+  "weight_decay": 0.01,
+  "lora_rank": 8,
+  "lora_alpha": 8,
+  "lora_dropout": 0.05,
+  "lora_layers_zero_based": [
+    8,
+    9,
+    10,
+    11
+  ],
+  "lora_target_modules": [
+    "query",
+    "value"
+  ],
+  "feature_extraction": "CLS",
+  "classification_head": "Dropout(0.3)+Linear(768,2)",
+  "classification_head_dropout": 0.3,
+  "physical_batch_size": 1,
+  "gradient_accumulation": 16,
+  "effective_batch_size": 16,
+  "mixed_precision": "fp16",
+  "scheduler": "CosineAnnealingLR",
+  "scheduler_T_max_epochs": 30,
+  "scheduler_eta_min": 1e-06,
+  "scheduler_step_unit": "epoch",
+  "max_epochs": 30,
+  "early_stopping_patience": 5,
+  "early_stopping_min_delta": 0.001,
+  "checkpoint_selection": "per_fold_validation_AUROC",
+  "decision_threshold_baseline": 0.5,
+  "threshold_selection": "after_training_using_development_predictions_only",
+  "test_pixels_are_off_limits": true,
+  "reference_e6_fold_manifest_sha256": "de28d3e209a0d073eab760c0fbaaf8adfbf3dc5dc537793e2a922c8bfb670640",
+  "reference_e5_test_manifest_sha256": "e62c588da8b406f6b8de90093f822c86620dd8701426d496de218f10ace7cc35",
+  "model_variants": [
+    {
+      "model": "M1",
+      "method": "frozen",
+      "variant": "raw"
+    },
+    {
+      "model": "M2",
+      "method": "frozen",
+      "variant": "clahe"
+    },
+    {
+      "model": "M3",
+      "method": "lora",
+      "variant": "raw"
+    },
+    {
+      "model": "M4",
+      "method": "lora",
+      "variant": "clahe"
+    }
+  ],
+  "frozen_head_batch_size": 64,
+  "frozen_extractor_physical_batch_size": 1,
+  "architecture": "Four models Frozen/LoRA RAW/CLAHE CLS Dropout(0.3) Linear(768,2)",
+  "n_training_runs": 20,
+  "note": "E7 four models changes head LR, regularization, LoRA alpha and scheduler together; testing not used for tuning."
+}

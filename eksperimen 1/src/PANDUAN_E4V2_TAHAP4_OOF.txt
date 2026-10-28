@@ -1,0 +1,56 @@
+EKSPERIMEN 4v2 — TAHAP 4: EVALUASI OOF 5-FOLD
+================================================
+
+Prasyarat:
+- Output perintah python 03_status_training_e4v2.py: COMPLETED: 20/20 training runs
+- Tahap 1: 01_e4_cv85_fold_lock_report.json status PASS
+- Tahap 2: 02_e4v2_dataloader_validation_report.json status PASS
+- Folder dan berkas checkpoint semua Fold 1–5 lengkap
+
+Ekstrak file 04_evaluasi_oof_5fold_e4v2.py ke:
+  D:\S2 Teknik Informatika\Semester 1\Riset\pre-researchhhh\RAD-DINO-TB\eksperimen4v2\src\
+
+Buka (tb-env) CMD di folder eksperimen4v2\src, lalu jalankan:
+
+  python 04_evaluasi_oof_5fold_e4v2.py --check
+  python 04_evaluasi_oof_5fold_e4v2.py --run
+  python 04_evaluasi_oof_5fold_e4v2.py --verify
+
+TARGET:
+  PASS_E4V2_OOF_MODEL_SELECTION_VERIFIED
+
+OUTPUT:
+  eksperimen4v2\output\cross_validation\04_oof_model_selection_v1\
+    04_e4v2_fold_metrics_20runs.csv
+    04_e4v2_oof_comparison_4models.csv
+    04_e4v2_oof_predictions_frozen_raw.csv
+    04_e4v2_oof_predictions_frozen_clahe.csv
+    04_e4v2_oof_predictions_lora_raw.csv
+    04_e4v2_oof_predictions_lora_clahe.csv
+    04_e4v2_oof_model_selection_LOCKED.json
+    04_e4v2_oof_model_selection_LOCKED.json.sha256
+
+Kirimkan untuk analisis:
+  04_e4v2_oof_comparison_4models.csv
+  04_e4v2_oof_model_selection_LOCKED.json
+
+Skrip:
+- Tidak mengimpor model, tidak menggunakan GPU, tidak melakukan training/inferensi.
+- Tidak membaca PNG atau label/prediksi dari test 257 citra; hanya metadata referensi dari laporan lock.
+- Memverifikasi 20 run, semua manifest fold, checksum file terbaik, probabilitas prediksi,
+  identitas pasien, metrik, epoch terbaik, dan reproducibility hashes.
+- Menghitung pooled OOF AUROC dari 1.411 citra; memilih konfigurasi primer berdasarkan pooled OOF AUROC.
+- Bersifat read-only saat --check; --run menolak menimpa folder output yang sudah ada.
+- --verify membandingkan ulang semua checkpoint/provenance dan hasil yang sudah tersimpan.
+
+CATATAN METODOLOGI:
+- Pasien tidak saling tumpang tindih dalam split, tetapi setiap checkpoint terpilih berdasarkan
+  validation AUROC dari fold yang sama; OOF berpotensi optimistis, bukan nested CV.
+- E4v2 memakai dataset tidak seimbang: development 478 DS-TB / 933 DR-TB.
+- Test E4 lama sudah pernah dievaluasi: jika dipakai nanti, hasilnya bersifat eksploratif.
+- E4v2 dan E6 memakai pasien testing berbeda. Jangan menafsirkan perubahan sebagai efek
+  kausal ukuran/keseimbangan dataset tanpa kontrol tambahan.
+
+Paket ini sudah melalui uji fixture simulasi untuk seluruh --check/--run/--verify,
+pendeteksian perubahan identitas pasien, dan proteksi penimpaan output.
+Hasil OOF aktual hanya dapat dihitung pada file output training asli di komputer Anda.

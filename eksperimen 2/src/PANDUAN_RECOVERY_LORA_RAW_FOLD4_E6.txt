@@ -1,0 +1,50 @@
+PEMULIHAN ERROR: Adapter export interrupted; inspect staging/backup directory
+EKSPERIMEN 6 | LoRA RAW FOLD 4
+
+PENYEBAB:
+Error berasal dari 04_train_lora_5fold_e6.py, fungsi export_best_adapter(),
+karena 'best_adapter_staging' dan/atau 'best_adapter_backup' tertinggal.
+Training epoch 7 sudah mencapai 1515/1515 mikro-batch, tetapi export gagal
+SEBELUM latest_training_state.pt epoch 7 disimpan. Resume kembali dari
+checkpoint epoch 6 sehingga epoch 7 akan dikerjakan ulang.
+
+JANGAN menghapus best_adapter, best_adapter_backup, best_adapter_staging,
+latest_training_state.pt, best_classifier.pt, training_history.csv, atau
+checkpoint fold lain. JANGAN mengulang Fold 4 tanpa --resume.
+
+SALIN:
+04_pulihkan_ekspor_adapter_e6.py -> RAD-DINO-TB\eksperimen6\src\
+
+JALANKAN DARI (tb-env) DI FOLDER eksperimen6\src:
+
+  python 04_pulihkan_ekspor_adapter_e6.py --fold 4 --variant raw --check
+
+Jika hasil 'DRY CHECK PASS':
+
+  python 04_pulihkan_ekspor_adapter_e6.py --fold 4 --variant raw --repair
+
+Jika hasil 'PASS_E6_LORA_EXPORT_RECOVERY':
+
+  python 04_train_lora_5fold_e6.py --fold 4 --variant raw --resume
+
+Setelah training selesai:
+
+  python 04_status_training_e6.py
+
+Target 'COMPLETED: 20/20 training runs'.
+
+CARA KERJA PULIHAN:
+- Memastikan latest_training_state.pt dan berkas best head/metric/predictions ada.
+- Memvalidasi adapter_config.json dan adapter_model.safetensors termasuk jumlah
+  parameter LoRA 98.304 dan r=8 alpha=16.
+- Jika staging tertinggal dan adapter target sebelumnya valid, memindahkan
+  staging ke folder arsip recovery; adapter target dibiarkan tetap.
+- Jika backup sebelumnya valid, memulihkan backup ke best_adapter karena itulah
+  pasangan bobot untuk best_classifier.pt yang sudah tersimpan; kandidat target
+  baru diamankan dalam folder arsip jika ada.
+- Tidak menghapus berkas apapun, semua direktori yang dipindahkan disimpan
+  dalam '_adapter_export_recovery_YYYYMMDD_HHMMSS_*'.
+- Jika keadaan tidak dapat dipulihkan dengan aman, berhenti tanpa --repair
+  dan bagikan hasil --check. Jangan mencoba membersihkan folder secara manual.
+
+Tidak perlu training ulang 19 fold lain. Test holdout tidak digunakan.

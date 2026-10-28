@@ -1,0 +1,71 @@
+EKSPERIMEN 6 — TAHAP 1 DAN 2
+FOLD MANIFEST LOCK: 15% FIXED TEST + 5-FOLD CV PADA 85% DEVELOPMENT
+===============================================================
+
+STATUS PROTOKOL: DIKUNCI PENGGUNA.
+- Dataset TOTAL: 2220 citra, 1730 pasien, DS 1110 / DR 1110.
+- DEVELOPMENT: E5 train (1554) + E5 validation (333) = 1887 citra,
+  1471 pasien, DS 944 / DR 943.
+- FIXED HOLDOUT TEST: partisi test E5 yang SAMA: 333 citra, 259 pasien.
+- CV: StratifiedGroupKFold(n_splits=5, shuffle=True, random_state=42)
+  berdasarkan label y_true dan patient_id.
+- Tiap citra development menjadi validation tepat SATU kali.
+- Holdout TIDAK MASUK proses fold, dan piksel holdout TIDAK dibaca.
+- PNG RAW dan CLAHE dari E5 dipakai lagi. Tidak preprocessing ulang.
+
+LANGKAH 1. Buat folder Eksperimen 6:
+  D:\S2 Teknik Informatika\Semester 1\Riset\pre-researchhhh\RAD-DINO-TB\eksperimen6\src
+
+Folder eksperimen5 harus tetap berada di:
+  ...\RAD-DINO-TB\eksperimen5
+
+LANGKAH 2. Salin file:
+  01_02_buat_5fold_eksperimen6.py
+ke folder eksperimen6\src.
+
+LANGKAH 3. Terminal (tb-env) di eksperimen6\src:
+  python 01_02_buat_5fold_eksperimen6.py --check
+
+  Status yang dicari: DRY CHECK PASS
+  --check tidak membuat atau mengubah file.
+
+LANGKAH 4. Buat manifest terkunci:
+  python 01_02_buat_5fold_eksperimen6.py --run
+
+  Status yang dicari: PASS_E6_FOLDS_LOCKED
+  Perintah tidak akan menimpa folder output yang sudah ada.
+
+LANGKAH 5. Verifikasi ulang hasil:
+  python 01_02_buat_5fold_eksperimen6.py --verify
+
+  Status yang dicari: VERIFY PASS_E6_FOLDS_LOCKED
+
+OUTPUT:
+  eksperimen6\data\manifests\experiment6_85dev_15test_5fold_seed42_v1\
+    e6_development_1887_5fold_LOCKED.csv
+    e6_patient_fold_assignments.csv
+    e6_fold_class_patient_counts.csv
+    e6_holdout_TEST_REFERENCE_DO_NOT_TRAIN.json
+    fold_1\train.csv, validation.csv
+    fold_2\train.csv, validation.csv
+    fold_3\train.csv, validation.csv
+    fold_4\train.csv, validation.csv
+    fold_5\train.csv, validation.csv
+    02_e6_5fold_lock_report.json
+
+PENTING:
+1. Output folder dan checksum tidak boleh diubah setelah terkunci.
+2. Jangan gunakan 08_train_frozen_e5.py / 09_train_lora_e5.py langsung
+   untuk Eksperimen 6: skrip E5 itu masih membaca split E5.
+   Kita akan membuat skrip training fold-specific pada tahap selanjutnya.
+3. Dataset testing E5 sudah pernah dievaluasi. Karena itu pengujian E6
+   pada holdout yang sama bersifat perbandingan eksploratif, bukan
+   konfirmasi pada dataset yang sepenuhnya belum pernah diamati.
+4. Penentuan best checkpoint dari AUROC pada validation fold yang sama
+   dapat memberi optimisme pada metrik OOF. Catat sebagai keterbatasan.
+5. Skrip ini membutuhkan numpy, pandas, scikit-learn; gunakan (tb-env).
+
+SETELAH SELESAI:
+Kirimkan 02_e6_5fold_lock_report.json dan e6_fold_class_patient_counts.csv.
+Tahap berikutnya validasi DataLoader E6 kemudian training 20 kombinasi
+(4 konfigurasi RAD-DINO × 5 fold), sesuai protokol training yang terkunci.

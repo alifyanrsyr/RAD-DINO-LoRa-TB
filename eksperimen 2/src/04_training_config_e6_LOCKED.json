@@ -1,0 +1,87 @@
+{
+  "experiment": "experiment6",
+  "model_id": "microsoft/rad-dino",
+  "seed": 42,
+  "labels": {
+    "DS-TB": 0,
+    "DR-TB": 1
+  },
+  "variants": [
+    "raw",
+    "clahe"
+  ],
+  "methods": [
+    "frozen",
+    "lora"
+  ],
+  "backbone_feature": "CLS_768",
+  "head": "Linear(768,2)",
+  "optimizer": "AdamW",
+  "loss": "CrossEntropyLoss",
+  "learning_rate_head": 0.001,
+  "learning_rate_lora": 0.0001,
+  "weight_decay": 0.0001,
+  "frozen_head_batch_size": 64,
+  "frozen_gradient_accumulation": 1,
+  "lora_micro_batch_size": 1,
+  "lora_gradient_accumulation": 16,
+  "lora": {
+    "r": 8,
+    "alpha": 16,
+    "dropout": 0.05,
+    "zero_based_blocks": [
+      8,
+      9,
+      10,
+      11
+    ],
+    "modules": [
+      "query",
+      "value"
+    ],
+    "expected_trainable_adapter_parameters": 98304
+  },
+  "max_epochs": 30,
+  "early_stopping_patience": 5,
+  "early_stopping_min_delta": 0.001,
+  "selection_metric": "validation_auroc",
+  "decision_threshold": 0.5,
+  "test_pixels_inaccessible_to_training": true,
+  "rescale_factor": 0.00392156862745098,
+  "image_mean": [
+    0.5307,
+    0.5307,
+    0.5307
+  ],
+  "image_std": [
+    0.2583,
+    0.2583,
+    0.2583
+  ],
+  "do_resize": false,
+  "do_center_crop": false,
+  "expected_hashes": {
+    "original_e5_split_sha256": "f67ee2747006aaecb03751b64fd6b0a944e157d5a81f762212b2926ee94fce0b",
+    "e5_processed_manifest_sha256": "7f17b9622f066347c7951314e12ad73a9b323929587b420e97538c2f38d7a457"
+  },
+  "status": "LOCKED_PROTOCOL_E6_FROM_E5_2026-10-22",
+  "cross_validation": true,
+  "folds": 5,
+  "split_algorithm": "StratifiedGroupKFold",
+  "split_seed": 42,
+  "cv_scope": "E5 train+validation 1887 images / 1471 patients",
+  "fixed_holdout": "E5 test 333 images / 259 patients (NEVER read during training)",
+  "checkpoint_selection": "per_fold_validation_AUROC_min_delta_0.001",
+  "primary_model_selection_after_cv": "out_of_fold_AUROC",
+  "final_inference": "five_checkpoint_probability_ensemble",
+  "protocol_note": "E6 85% development 5-fold, fixed 15% E5 test; no holdout pixel access during training",
+  "locked_e6_fold_manifest_sha256": "de28d3e209a0d073eab760c0fbaaf8adfbf3dc5dc537793e2a922c8bfb670640",
+  "locked_e6_fold_report_sha256": "646898877ab9e3f8d309823c9c67aecac87bfa3d6ed810ce7751920f8433d80e",
+  "e5_test_manifest_sha256": "e62c588da8b406f6b8de90093f822c86620dd8701426d496de218f10ace7cc35",
+  "splits": {
+    "development_images": 1887,
+    "development_patients": 1471,
+    "heldout_test_images": 333,
+    "heldout_test_patients": 259
+  }
+}

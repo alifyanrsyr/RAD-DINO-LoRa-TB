@@ -1,0 +1,37 @@
+EKSPERIMEN 6 — TAHAP 7: ANALISIS & VISUALISASI E5 vs E6
+
+1. Ekstrak 07_visualisasi_analisis_akhir_e6.py ke:
+   RAD-DINO-TB\eksperimen6\src\
+
+2. Buka CMD / Anaconda Prompt, aktifkan (tb-env), dan masuk ke folder tersebut.
+
+3. Jalankan berurutan:
+   python 07_visualisasi_analisis_akhir_e6.py --check
+   python 07_visualisasi_analisis_akhir_e6.py --run
+   python 07_visualisasi_analisis_akhir_e6.py --verify
+
+   Target: PASS_E6_STAGE7_VISUALIZATION_VERIFIED
+
+4. Output:
+   eksperimen6\output\visualizations\07_final_comparison_v1\
+   - 9 PNG, 16:9
+   - 07_e6_final_comparison.csv
+   - 07_e6_final_analysis.md
+   - 07_e6_visualization_audit_report.json
+
+5. Input yang dipakai (tidak diubah):
+   eksperimen5\output\testing\11_final_holdout_test_v1\11_test_comparison.csv
+   eksperimen5\output\testing\11_final_holdout_test_v1\11_final_holdout_test_report.json
+   eksperimen5\data\manifests\experiment5_split_70_15_15_seed42_v1\test.csv (HANYA checksum)
+   eksperimen6\output\cross_validation\05_oof_model_selection_v1\05_e6_oof_comparison_4models.csv
+   eksperimen6\output\cross_validation\05_oof_model_selection_v1\05_e6_oof_model_selection_LOCKED.json
+   eksperimen6\output\testing\06_e6_five_fold_ensemble_holdout_v1\06_e6_ensemble_test_comparison.csv
+   eksperimen6\output\testing\06_e6_five_fold_ensemble_holdout_v1\06_e6_ensemble_holdout_test_LOCKED.json
+
+CATATAN:
+- Tidak dilakukan training, inferensi ulang, pemilihan model ulang, atau pembacaan piksel testing.
+- Seluruh hasil bersifat image-level; tidak merepresentasikan evaluasi patient-level.
+- Test sudah pernah digunakan Eksperimen 5, jadi klaim perbandingan E5 vs E6 bersifat eksploratif.
+- Output yang sudah ada tidak ditimpa. Untuk verifikasi gunakan --verify.
+- Tidak menyimpulkan signifikansi statistik tanpa analisis inferensial terpisah.
+- Membutuhkan numpy, pandas, matplotlib.

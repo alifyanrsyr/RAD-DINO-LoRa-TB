@@ -1,0 +1,9 @@
+E7 (hanya M4 / LoRA CLAHE) | 5 fold E6 yang sama
+learning_rate_head=0.0001 ; learning_rate_lora=0.0001
+weight_decay=0.01 ; lora_rank=8 ; lora_alpha=8 ; lora_dropout=0.05
+head=Dropout(0.3)->Linear(768,2) ; CLS token, TANPA GAP
+AdamW ; CosineAnnealingLR(T_max=30,eta_min=1e-6) per epoch
+physical_batch=1 ; gradient_accumulation=16 ; AMP fp16
+max_epochs=30 ; patience=5 ; min_delta_auc=0.001 ; seed=42
+subset=E6 development 1887 images/1471 patients; test E5 333 untouched
+threshold: baseline=0.5, analisis alternatif dilakukan setelah training menggunakan OOF
